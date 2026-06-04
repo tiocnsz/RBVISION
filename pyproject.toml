@@ -1,0 +1,167 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rbvision"
+version = "0.1.0"
+description = "工业手眼标定 + 机械臂位置反馈模拟平台 (面向海康 VM 4.x)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "TBD" }
+authors = [
+    { name = "RBVISION Team" },
+]
+keywords = [
+    "industrial-automation",
+    "machine-vision",
+    "hand-eye-calibration",
+    "gige-vision",
+    "modbus",
+    "scara",
+    "robot-arm",
+    "hikrobot",
+    "visionmaster",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Manufacturing",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Microsoft :: Windows :: Windows 10",
+    "Operating System :: Microsoft :: Windows :: Windows 11",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering",
+    "Topic :: System :: Hardware :: Hardware Drivers",
+]
+
+dependencies = [
+    "PySide6>=6.5.0,<6.8",
+    "vispy>=0.14.0",
+    "opencv-python>=4.8.0",
+    "numpy>=1.24.0",
+    "scipy>=1.10.0",
+    "pymodbus>=3.6.0",
+    "urdfpy>=0.0.20",
+    "PyYAML>=6.0",
+    "loguru>=0.7.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-qt>=4.2.0",
+    "pytest-cov>=4.1.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.5.0",
+]
+
+[project.scripts]
+rbvision = "rbvision.scripts.run_app:main"
+rbvision-headless = "rbvision.scripts.run_headless:main"
+
+[project.urls]
+"Homepage" = "https://github.com/your-org/rbvision"
+"Bug Tracker" = "https://github.com/your-org/rbvision/issues"
+
+# ===== setuptools 配置 =====
+[tool.setuptools]
+package-dir = { "" = "src" }
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"rbvision" = ["py.typed"]
+
+# ===== pytest 配置 =====
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+pythonpath = ["src"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+    "--tb=short",
+]
+markers = [
+    "slow: 慢速测试 (deselect with '-m \"not slow\"')",
+    "integration: 集成测试",
+    "gige: 需要 GigE 协议栈的测试",
+    "modbus: 需要 Modbus 服务的测试",
+    "qt: 需要 PySide6 GUI 的测试",
+]
+filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning:vispy.*",
+    "ignore::DeprecationWarning:pymodbus.*",
+]
+
+# ===== coverage 配置 =====
+[tool.coverage.run]
+source = ["src/rbvision"]
+branch = true
+omit = [
+    "*/tests/*",
+    "*/scripts/*",
+    "*/__init__.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+show_missing = true
+precision = 2
+fail_under = 70
+
+# ===== black 配置 =====
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311"]
+include = '\.pyi?$'
+
+# ===== ruff 配置 =====
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long (black handles)
+    "B008",  # do not perform function calls in argument defaults
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["B011"]  # asserts in tests
+
+# ===== mypy 配置 =====
+[tool.mypy]
+python_version = "3.10"
+strict = false
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "vispy.*"
+ignore_missing_imports = true

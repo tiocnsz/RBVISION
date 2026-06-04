@@ -1,0 +1,90 @@
+# 默认 Modbus 寄存器映射
+# 5 段地址, 详细见 docs/modbus_register.md
+
+modbus:
+  # 通信参数
+  host: "0.0.0.0"        # 监听所有接口
+  port: 502              # Modbus 标准端口
+  unit_id: 1             # 从站地址
+  byte_order: "big"     # 大端 (与海康 VM 默认一致)
+  poll_interval_ms: 20   # 轮询周期 50Hz
+
+  # 角色
+  role: "server"         # server (本项目作为 Server) | client
+
+  # === 段 0-99: 标定数据 ===
+  segment_calibration:
+    start: 0
+    end: 99
+    # 见 register_map.calibration
+
+  # === 段 100-199: 运动指令 (VM -> 本项目) ===
+  segment_motion_cmd:
+    start: 100
+    end: 199
+    # 见 register_map.motion_cmd
+
+  # === 段 200-299: 位置反馈 (本项目 -> VM) ===
+  segment_feedback:
+    start: 200
+    end: 299
+    # 见 register_map.feedback
+
+  # === 段 300-399: 状态/控制 ===
+  segment_status:
+    start: 300
+    end: 399
+    # 见 register_map.status
+
+  # === 段 400-499: 实时坐标转换服务 ===
+  segment_transform:
+    start: 400
+    end: 499
+    # 见 register_map.transform
+
+# === 详细寄存器映射 (运行时由 register_map.py 解析) ===
+# 0-1:   CalPointCount (uint16) - 标定点数
+# 2-3:   CalPoint1_X (float32)
+# 4-5:   CalPoint1_Y (float32)
+# ...
+# 18-19: CalPoint9_X
+# 20-21: CalPoint9_Y
+# 22-23: reserved
+# 24-25: CalImagePoint1_U (int32) - VM 写入
+# 26-27: CalImagePoint1_V
+# ...
+# 40-41: CalImagePoint9_U
+# 42-43: CalImagePoint9_V
+# 44-45: CalReprojError (float32)
+# 46:    CalStatus (uint16) - 0=空闲 1=示教中 2=待图像 3=计算中 4=完成 5=失败
+
+# 100-101: Target_X (float32, mm)
+# 102-103: Target_Y
+# 104-105: Target_Z
+# 106-107: Target_RX
+# 108-109: Target_RY
+# 110-111: Target_RZ
+# 112:     CoordSystem (uint16) - 0=大地 1=工具
+# 113:     MotionType (uint16) - 0=PTP 1=Linear 2=Circle (预留)
+# 114-115: Velocity (float32, mm/s)
+# 116:     BlendRadius (uint16) - 平滑半径 (预留)
+
+# 200-201: Actual_X (float32)
+# ...
+# 210-211: Actual_RZ
+# 212-213: Actual_Q1
+# 214-215: Actual_Q2
+# 216-217: Actual_Q3
+# 218-219: Actual_Q4
+# (SCARA 4-DOF, 只用 Q1-Q4; 6-DOF 时用 Q1-Q6)
+
+# 300: StatusWord (uint16) - bit0=运行 bit1=到位 bit2=错误
+# 301: ControlWord (uint16) - bit0=使能 bit1=急停 bit2=回零
+# 302: ErrorCode (uint16)
+# 303: WarningCode (uint16)
+
+# 400-401: Query_U (int32, pixel)
+# 402-403: Query_V (int32, pixel)
+# 404-405: Result_X (float32, mm)
+# 406-407: Result_Y (float32, mm)
+# 408:     QueryStatus (uint16) - 0=无 1=待 2=完成 3=无标定

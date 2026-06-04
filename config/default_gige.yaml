@@ -1,0 +1,87 @@
+# 默认 GigE Vision 模拟相机配置
+
+gige:
+  # 设备标识
+  device:
+    vendor_name: "RBVISION"
+    model_name: "RBVISION-Virtual-Cam"
+    serial_number: "RBV-0001"
+    user_defined_name: "Virtual SCARA Cam"
+    firmware_version: "1.0.0"
+
+  # 网络
+  network:
+    gvcp_port: 3956    # 控制通道 (Discovery + Read/Write Cmd)
+    gvsp_port: 3957    # 数据通道 (Stream)
+    heartbeat_timeout_ms: 3000
+    # 设备 IP (默认自动获取本机 IP)
+    # device_ip: "192.168.1.100"
+
+  # 相机位姿 (3D 场景中的虚拟相机)
+  camera:
+    mode: eye_to_hand           # eye_to_hand | eye_in_hand | custom
+    preset: oblique_overhead    # oblique_overhead | top_down | side_view | eye_in_hand | custom
+
+    # eye_to_hand 模式: 固定相机
+    position: [0.4, 0.0, 0.6]   # 相机在基坐标系下的位置 (米)
+    target:   [0.0, 0.0, 0.0]   # 看向的目标点
+    up:       [0.0, 1.0, 0.0]   # 相机上方向
+    fov: 45.0                   # 视场角 (度)
+    near: 0.01
+    far: 5.0
+
+    # eye_in_hand 模式 (切换 mode 时启用)
+    end_effector_mount: false
+    mount_offset: [0.0, 0.0, 0.05]
+    mount_rotation: [0.0, 0.0, 0.0]
+
+  # 图像
+  image:
+    # 输出给 VM 的图像
+    width: 1920
+    height: 1080
+    pixel_format: "Mono8"     # Mono8 | RGB8 | BayerRG8
+    fps: 25
+
+  # 触发
+  trigger:
+    mode: "continuous"        # continuous | soft | external
+    # soft 模式: 通过 Modbus 控制字触发
+    # external 模式: 通过 Modbus 数字输入触发
+    debounce_ms: 50
+
+  # 图像源 (3 选 1)
+  image_source:
+    type: "scene_render"      # scene_render | video_file | image_sequence
+
+    # scene_render: 从 3D 场景实时截图
+    scene_render:
+      target_fps: 25
+      # 可以选择性隐藏某些对象 (调试用)
+      show_arm: true
+      show_board: true
+      show_trajectory: true
+      show_grid: true
+      # 在图像上叠加调试信息
+      overlay:
+        enabled: false
+        text: ""
+
+    # video_file: 循环播放视频
+    video_file:
+      path: ""
+      loop: true
+      start_frame: 0
+
+    # image_sequence: 按帧号取图
+    image_sequence:
+      pattern: ""
+      start_index: 0
+      loop: true
+
+  # 兼容性
+  compatibility:
+    # 海康 VM 4.x 兼容模式 (P0)
+    hikrobot_vm4_mode: true
+    # 在 Discovery 响应中模拟更详细的 GenICam 字段
+    extended_genicam: true

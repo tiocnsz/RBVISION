@@ -1,0 +1,60 @@
+# 默认 9 点标定配置
+
+calibration:
+  # 标定点数 (默认 9, 可配 N≥4)
+  n_points: 9
+
+  # 标定模型
+  #   - affine: 2D 仿射 (N=9 默认, 适合大多数场景)
+  #   - homography: 单应性 (N≥4, 适合大畸变 / 斜视 / eye-in-hand)
+  #   - polynomial: 多项式 (N≥12, 适合强非线性)
+  model: affine
+
+  # 模型参数
+  model_params:
+    affine:
+      # 仿射矩阵: [X, Y, 1]^T = M @ [u, v, 1]^T
+      # M 是 3x3 矩阵, 包含平移+旋转+缩放+剪切
+      pass
+
+    homography:
+      # 单应性矩阵: 3x3, 用 cv2.findHomography
+      method: RANSAC       # RANSAC / LMEDS / 普通最小二乘
+      ransac_reproj_threshold: 3.0   # 像素
+
+    polynomial:
+      # 多项式阶数 (2 阶或 3 阶)
+      order: 2
+      # 用 scipy 拟合 X = f(u,v), Y = g(u,v)
+
+  # 示教模式
+  teaching:
+    # 增量步长 (m)
+    cartesian_step: 0.005   # 5mm
+    # 增量步长 (rad)
+    rotation_step: 0.0174   # 1°
+    # 单步/连续模式
+    default_mode: step      # step | continuous
+    # 关节示教步长 (rad)
+    joint_step: 0.0174
+
+  # 误差阈值
+  thresholds:
+    # 标定可接受的 RMS 重投影误差 (mm)
+    rms_error_acceptable: 0.5     # < 0.5mm 算通过
+    rms_error_warning: 1.0         # 0.5~1.0mm 警告
+    # > 1.0mm 算失败, 建议重新标定
+
+  # 标定文件
+  file:
+    default_dir: "%APPDATA%/RBVISION/calibration/"  # Windows
+    # default_dir: "~/.config/rbvision/calibration/"  # Linux
+    naming_pattern: "calib_{timestamp}.yaml"
+    auto_load_latest: true       # 启动时自动加载最新标定
+
+  # 9 点标定板几何 (用于 3D 渲染)
+  board:
+    layout: 3x3                  # 3x3 网格
+    spacing: 0.030               # 点间距 30mm
+    dot_radius: 0.005            # 圆点半径 5mm
+    origin: "bottom_left"        # 坐标系原点在左下角

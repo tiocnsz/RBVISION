@@ -1,0 +1,96 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Conda / Virtualenv
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+conda-env.yml
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# PyCharm
+.idea/
+*.iml
+
+# 测试
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+
+# 日志
+*.log
+logs/
+*.log.*
+
+# 数据/缓存
+data/cache/
+data/temp/
+*.tmp
+
+# 模型/资产 (大文件)
+models/*.stl
+models/*.obj
+models/*.dae
+models/*.urdf
+!models/.gitkeep
+
+# 标定/录制数据
+calibration/*.yaml
+!calibration/.gitkeep
+recordings/*.csv
+recordings/*.json
+!recordings/.gitkeep
+
+# 截图
+*.png
+!docs/**/*.png
+!tests/fixtures/**/*.png
+
+# 配置 (本地)
+config/local/
+.env.local
+
+# PyInstaller
+*.spec
+*.app
+
+# Matrix MCP 临时文件
+matrix-media-*.png
+_gen_image_request.json

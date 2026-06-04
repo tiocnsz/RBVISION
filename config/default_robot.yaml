@@ -1,0 +1,72 @@
+# 默认机械臂配置 - SCARA 4-DOF
+# 用于: 通用装配/点胶/小件抓取 (工业最常见)
+# 数据来源: 通用 SCARA 几何,非特定品牌
+
+robot:
+  profile: scara_4dof
+  name: "Generic SCARA 4-DOF"
+  description: "通用 4 自由度 SCARA 机械臂, 4-DH 参数配置"
+  n_joints: 4
+  base_height: 0.0      # 底座到地面的高度 (m)
+  tool_length: 0.05     # 默认工具长度 (m)
+
+# DH 参数 (Modified DH, Craig 格式)
+# 4 个 link:
+#   link 1: 基座旋转 (θ1)
+#   link 2: 大臂 (θ2)
+#   link 3: 升降 (d3, Z 方向)
+#   link 4: 末端旋转 (θ4)
+dh_params:
+  - { name: "joint1_base",   a: 0.0,   alpha: 0.0,          d: 0.0,    theta_offset: 0.0 }
+  - { name: "joint2_arm",    a: 0.225, alpha: 0.0,          d: 0.0,    theta_offset: 0.0 }
+  - { name: "joint3_z",      a: 0.175, alpha: 3.14159265,   d: 0.0,    theta_offset: 0.0 }
+  - { name: "joint4_wrist",  a: 0.0,   alpha: 0.0,          d: 0.05,   theta_offset: 0.0 }
+
+# 关节限位 (rad / m)
+joint_limits:
+  joint1: { min: -3.14159, max: 3.14159, unit: "rad", desc: "基座旋转 ±180°" }
+  joint2: { min: -2.61799, max: 2.61799, unit: "rad", desc: "大臂 ±150°" }
+  joint3: { min: 0.0,      max: 0.150,   unit: "m",   desc: "升降 0~150mm" }
+  joint4: { min: -6.28318, max: 6.28318, unit: "rad", desc: "末端旋转 ±360°" }
+
+# 关节角速度限制
+joint_velocity_limits:
+  joint1: 3.14   # rad/s
+  joint2: 3.14
+  joint3: 0.5    # m/s
+  joint4: 6.28
+
+# 视觉化参数 (3D 渲染用, 米)
+visualization:
+  base_radius: 0.06
+  base_height: 0.10
+  arm1_length: 0.225
+  arm1_thickness: 0.025
+  arm2_length: 0.175
+  arm2_thickness: 0.020
+  z_axis_length: 0.150
+  tool_length: 0.05
+  color: "#4A90E2"     # 主色 (蓝色)
+  accent: "#F5A623"    # 强调色 (橙色, 用于末端)
+
+# === 后期可扩展的其他 profile (注释掉) ===
+# robot_6dof:
+#   profile: ur5_6dof
+#   name: "Universal Robots UR5"
+#   n_joints: 6
+#   dh_params:
+#     - { a: 0.0,    alpha: 1.5708, d: 0.089, theta_offset: 0.0 }
+#     - { a: -0.425, alpha: 0.0,    d: 0.0,   theta_offset: 0.0 }
+#     - { a: -0.392, alpha: 0.0,    d: 0.0,   theta_offset: 0.0 }
+#     - { a: 0.0,    alpha: 1.5708, d: 0.109, theta_offset: 0.0 }
+#     - { a: 0.0,    alpha: -1.5708,d: 0.094, theta_offset: 0.0 }
+#     - { a: 0.0,    alpha: 0.0,    d: 0.082, theta_offset: 0.0 }
+#   joint_limits:
+#     joint1: { min: -6.28, max: 6.28, unit: "rad" }
+#     ...
+#
+# robot_delta:
+#   profile: delta_3dof
+#   name: "Generic Delta 3-DOF (Spider)"
+#   n_joints: 3
+#   ...
