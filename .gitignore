@@ -94,3 +94,10 @@ config/local/
 # Matrix MCP 临时文件
 matrix-media-*.png
 _gen_image_request.json
+
+# Mavis runtime / IDE 状态
+.mavis/
+.opencode/
+docs/m1-skeleton-preview.py
+_agent_list.log
+_plan_run.log
