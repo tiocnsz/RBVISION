@@ -161,6 +161,25 @@ class RobotArm:
         """重置关节角到零位."""
         self._q = np.zeros(self.n_joints, dtype=np.float64)
 
+    def teach(self) -> None:
+        """
+        进入示教模式 (M4 预留接口).
+
+        示教模式允许用户手动拖动机械臂末端, 记录关键位姿用于回放.
+        当前 milestone 尚未实现, 调用即抛 NotImplementedError.
+
+        Raises:
+            NotImplementedError: M4 尚未发布.
+
+        Notes:
+            · M2: 仿真模式下, 通过 VisPy 拖动机械臂末端 (3D 抓取)
+            · M4: 真实 Modbus 设备 + 安全联锁 (急停 + 限位检查)
+        """
+        raise NotImplementedError(
+            "teach() is reserved for M4 (teach-pendant + playback). "
+            "Use set_joint_angles() for now to manually set joint positions."
+        )
+
     def __repr__(self) -> str:
         q_list = [round(float(qi), 4) for qi in self._q]
         return f"{self.name} ({self.n_joints}-DOF, q={q_list})"

@@ -195,6 +195,10 @@ class TestReset:
         arm.reset()
         np.testing.assert_array_equal(arm.get_joint_angles(), np.zeros(4))
 
+
+class TestRepr:
+    """__repr__ 调试输出."""
+
     def test_repr_includes_name_and_dof(self):
         """__repr__ 包含机械臂名和 DOF 数."""
         dh = DHParams.scara_4dof()
@@ -202,3 +206,91 @@ class TestReset:
         r = repr(arm)
         assert "Demo" in r
         assert "4-DOF" in r
+
+    def test_repr_includes_current_q(self):
+        """__repr__ 包含当前关节角 (调试时方便)."""
+        dh = DHParams.scara_4dof()
+        arm = RobotArm(dh, [(-1.0, 1.0)] * 4, name="X")
+        arm.set_joint_angles(np.array([0.1, 0.2, 0.3, 0.4]))
+        r = repr(arm)
+        # 关节角应该被 round 到 4 位小数
+        assert "0.1" in r
+        assert "0.4" in r
+
+    def test_repr_uses_default_name(self):
+        """__repr__ 在未指定 name 时使用 'Generic Arm'."""
+        dh = DHParams.scara_4dof()
+        arm = RobotArm(dh, [(-1.0, 1.0)] * 4)
+        assert "Generic Arm" in repr(arm)
+
+
+class TestTeachReserved:
+    """teach() 预留接口 (M4 实现)."""
+
+    def test_teach_raises_not_implemented(self):
+        """teach() 当前抛 NotImplementedError, 错误信息提示 M4."""
+        dh = DHParams.scara_4dof()
+        arm = RobotArm(dh, [(-3.14, 3.14)] * 4)
+        with pytest.raises(NotImplementedError) as exc_info:
+            arm.teach()
+        assert "M4" in str(exc_info.value) or "reserved" in str(exc_info.value).lower()
+
+    def test_teach_does_not_modify_state(self):
+        """teach() 抛错后, 关节角状态不应被破坏."""
+        dh = DHParams.scara_4dof()
+        arm = RobotArm(dh, [(-3.14, 3.14)] * 4)
+        arm.set_joint_angles(np.array([0.1, 0.2, 0.3, 0.4]))
+        q_before = arm.get_joint_angles()
+        with pytest.raises(NotImplementedError):
+            arm.teach()
+        np.testing.assert_array_equal(arm.get_joint_angles(), q_before)
+
+
+class TestStateIndependence:
+    """多个 RobotArm 实例的状态互相独立 (确保没有 class-level 共享状态)."""
+
+    def test_two_arms_independent_q(self):
+        """两个 RobotArm 实例的 q 互不影响."""
+        dh = DHParams.scara_4dof()
+        arm1 = RobotArm(dh, [(-1.0, 1.0)] * 4, name="Arm1")
+        arm2 = RobotArm(dh, [(-1.0, 1.0)] * 4, name="Arm2")
+        arm1.set_joint_angles(np.array([0.5, 0.5, 0.5, 0.5]))
+        # arm2 应该是默认全零
+        np.testing.assert_array_equal(arm2.get_joint_angles(), np.zeros(4))
+        # 改 arm2 不影响 arm1
+        arm2.set_joint_angles(np.array([0.9, 0.9, 0.9, 0.9]))
+        np.testing.assert_array_equal(arm1.get_joint_angles(), [0.5, 0.5, 0.5, 0.5])
+
+    def test_reset_isolated(self):
+        """一个 arm 的 reset 不影响另一个 arm."""
+        dh = DHParams.scara_4dof()
+        arm1 = RobotArm(dh, [(-1.0, 1.0)] * 4)
+        arm2 = RobotArm(dh, [(-1.0, 1.0)] * 4)
+        arm1.set_joint_angles(np.array([0.5, 0.5, 0.5, 0.5]))
+        arm2.set_joint_angles(np.array([0.7, 0.7, 0.7, 0.7]))
+        arm1.reset()
+        np.testing.assert_array_equal(arm1.get_joint_angles(), np.zeros(4))
+        np.testing.assert_array_equal(arm2.get_joint_angles(), [0.7, 0.7, 0.7, 0.7])
+
+
+class TestDHEquality:
+    """DHParams 在不同构造路径下的一致性."""
+
+    def test_yaml_matches_factory(self):
+        """YAML 加载的 SCARA 应与工厂方法一致."""
+        from pathlib import Path
+
+        yaml_path = Path(__file__).resolve().parent.parent / "config" / "default_robot.yaml"
+        dh_yaml = DHParams.from_yaml(yaml_path)
+        dh_factory = DHParams.scara_4dof()
+        assert dh_yaml == dh_factory
+
+    def test_ur5_arm_creation(self):
+        """UR5 6-DOF 也能创建 RobotArm."""
+        dh = DHParams.ur5_6dof()
+        arm = RobotArm(dh, [(-3.14, 3.14)] * 6, name="UR5")
+        assert arm.n_joints == 6
+        assert arm.name == "UR5"
+        # 6-DOF FK 应能正常工作
+        pose = arm.forward_kinematics()
+        assert pose is not None

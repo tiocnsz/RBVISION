@@ -67,6 +67,31 @@ def forward_kinematics(q: np.ndarray, dh: DHParams) -> np.ndarray:
     return T
 
 
+def jacobian(q: np.ndarray, dh: DHParams) -> np.ndarray:
+    """
+    几何雅可比矩阵 (M3 实现, 当前为预留接口).
+
+    J(q) ∈ R^{6×n}, 描述末端线速度/角速度与关节速度的关系:
+        v_ee = J(q) @ q_dot
+
+    Args:
+        q: 关节角向量 (n,).
+        dh: DH 参数 (任意 DOF).
+
+    Returns:
+        6×n 雅可比矩阵.
+
+    Raises:
+        NotImplementedError: 当前 milestone 尚未实现 (M3 规划).
+    """
+    # 当前为预留接口, 始终抛 NotImplementedError.
+    # 校验交给上层调用者; 这里不预先校验 q/dh 以保持接口稳定.
+    raise NotImplementedError(
+        "jacobian() is reserved for M3 (inverse kinematics + motion control). "
+        "Current implementation: only forward_kinematics is supported."
+    )
+
+
 def link_transforms(q: np.ndarray, dh: DHParams) -> List[np.ndarray]:
     """
     返回所有 link 的累积 4x4 变换 (用于 3D 渲染).
